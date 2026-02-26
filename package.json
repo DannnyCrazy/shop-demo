@@ -5,6 +5,7 @@
     "build": "node build.js"
   },
   "dependencies": {
+    "better-sqlite3": "^12.6.2",
     "hono": "^4.12.2"
   },
   "devDependencies": {

@@ -1,6 +1,5 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { serveStatic } from 'hono/bun'
 import { sign, verify } from 'hono/jwt'
 import db from './db'
 
@@ -9,8 +8,8 @@ const SECRET = 'super-secret-key' // In prod, use env var
 
 app.use('/*', cors())
 
-// Serve static files (models, docs) from server/public folder
-app.use('/static/*', serveStatic({ root: './public', rewriteRequestPath: (path) => path.replace(/^\/static/, '') }))
+// Static files are served by Vercel/Nginx directly from public/ folder
+// For local Bun development, run `bun run dev` which should handle static assets or use a separate static server.
 
 // Auth Routes
 app.post('/api/login', async (c) => {
