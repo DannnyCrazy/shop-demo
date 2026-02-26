@@ -1,11 +1,11 @@
 {
   "name": "shop-demo-root",
   "private": true,
-  "type": "module",
   "scripts": {
     "build": "node build.cjs"
   },
   "dependencies": {
+    "@hono/node-server": "^1.19.9",
     "better-sqlite3": "^12.6.2",
     "hono": "^4.12.2"
   },

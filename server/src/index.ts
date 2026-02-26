@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { sign, verify } from 'hono/jwt'
-import db from './db.js'
+import db from './db'
 
 const app = new Hono()
 const SECRET = 'super-secret-key' // In prod, use env var

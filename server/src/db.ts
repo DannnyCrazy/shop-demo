@@ -1,9 +1,6 @@
 import { MemoryDatabase } from './db-memory.js'
 import path from 'path'
 import fs from 'fs'
-import { createRequire } from 'module'
-
-const require = createRequire(import.meta.url)
 
 // Helper to determine environment
 declare const Bun: any
