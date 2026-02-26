@@ -1,8 +1,13 @@
 import { handle } from 'hono/vercel'
-import app from '../server/src/index'
 
 export const config = {
   runtime: 'nodejs'
 }
 
-export default handle(app)
+// 使用动态 import 来导入 ES Module
+const handler = async (req: Request, ev: any) => {
+  const { default: app } = await import('../server/src/index')
+  return handle(app)(req, ev)
+}
+
+export default handler
