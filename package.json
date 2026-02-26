@@ -1,0 +1,14 @@
+{
+  "name": "shop-demo-root",
+  "private": true,
+  "scripts": {
+    "build": "node build.js"
+  },
+  "dependencies": {
+    "hono": "^4.12.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "bun-types": "latest"
+  }
+}
