@@ -5,6 +5,9 @@
   "functions": {
     "api/index.ts": {
       "includeFiles": "shop.sqlite"
+    },
+    "api/[...path].ts": {
+      "includeFiles": "shop.sqlite"
     }
   },
   "rewrites": [
