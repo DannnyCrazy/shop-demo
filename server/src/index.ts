@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import type { Context } from 'hono'
 import { cors } from 'hono/cors'
 import { sign, verify } from 'hono/jwt'
 import db from './db'
@@ -36,7 +37,7 @@ app.post('/api/register', async (c) => {
 })
 
 // Middleware for admin auth
-const adminAuth = async (c, next) => {
+const adminAuth = async (c: Context, next: () => Promise<void>) => {
   const authHeader = c.req.header('Authorization')
   if (!authHeader) return c.json({ error: 'Unauthorized' }, 401)
 
