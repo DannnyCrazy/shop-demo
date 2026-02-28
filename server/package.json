@@ -8,6 +8,7 @@
     "start": "bun run src/index.ts"
   },
   "dependencies": {
+    "@vercel/postgres": "^0.10.0",
     "hono": "^4.0.0"
   },
   "devDependencies": {

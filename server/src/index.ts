@@ -14,10 +14,15 @@ app.use('/*', cors())
 // For local Bun development, run `bun run dev` which should handle static assets or use a separate static server.
 
 const registerRoutes = (router: Hono) => {
+  router.use('*', async (c, next) => {
+    await db.ready
+    await next()
+  })
+
   // Auth Routes
   router.post('/login', async (c) => {
     const { username, password } = await c.req.json()
-    const user = db.query('SELECT * FROM users WHERE username = ? AND password = ?').get(username, password) as any
+    const user = (await db.query('SELECT * FROM users WHERE username = ? AND password = ?').get(username, password)) as any
 
     if (user) {
       const token = await sign({ id: user.id, role: user.role, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 }, SECRET)
@@ -29,7 +34,7 @@ const registerRoutes = (router: Hono) => {
   router.post('/register', async (c) => {
     const { username, password } = await c.req.json()
     try {
-      const result = db.run('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', [username, password, 'user'])
+      const result = await db.run('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', [username, password, 'user'])
       const user = { id: result.lastInsertRowid, username, role: 'user' }
       const token = await sign({ id: user.id, role: user.role, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 }, SECRET)
       return c.json({ token, user })
@@ -55,8 +60,8 @@ const registerRoutes = (router: Hono) => {
   }
 
   // Product Routes
-  router.get('/products', (c) => {
-    const products = db.query('SELECT * FROM products').all()
+  router.get('/products', async (c) => {
+    const products = await db.query('SELECT * FROM products').all()
     // Parse JSON fields
     const result = products.map((p: any) => ({
       ...p,
@@ -66,9 +71,9 @@ const registerRoutes = (router: Hono) => {
     return c.json(result)
   })
 
-  router.get('/products/:id', (c) => {
+  router.get('/products/:id', async (c) => {
     const id = c.req.param('id')
-    const product: any = db.query('SELECT * FROM products WHERE id = ?').get(id)
+    const product: any = await db.query('SELECT * FROM products WHERE id = ?').get(id)
     if (!product) return c.json({ error: 'Not found' }, 404)
     return c.json({
       ...product,
@@ -81,7 +86,7 @@ const registerRoutes = (router: Hono) => {
     const body = await c.req.json()
     const { name, description, price, stock, category, specs, images, model_url, doc_url } = body
 
-    const result = db.run(
+    const result = await db.run(
       `
     INSERT INTO products (name, description, price, stock, category, specs, images, model_url, doc_url)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -97,7 +102,7 @@ const registerRoutes = (router: Hono) => {
     const body = await c.req.json()
     const { name, description, price, stock, category, specs, images, model_url, doc_url } = body
 
-    db.run(
+    await db.run(
       `
     UPDATE products SET name=?, description=?, price=?, stock=?, category=?, specs=?, images=?, model_url=?, doc_url=?
     WHERE id=?
@@ -108,15 +113,15 @@ const registerRoutes = (router: Hono) => {
     return c.json({ id, ...body })
   })
 
-  router.delete('/products/:id', adminAuth, (c) => {
+  router.delete('/products/:id', adminAuth, async (c) => {
     const id = c.req.param('id')
-    db.run('DELETE FROM products WHERE id = ?', [id])
+    await db.run('DELETE FROM products WHERE id = ?', [id])
     return c.json({ success: true })
   })
 
   // Order Routes
-  router.get('/orders', adminAuth, (c) => {
-    const orders = db.query('SELECT * FROM orders ORDER BY created_at DESC').all()
+  router.get('/orders', adminAuth, async (c) => {
+    const orders = await db.query('SELECT * FROM orders ORDER BY created_at DESC').all()
     const result = orders.map((o: any) => ({
       ...o,
       items: JSON.parse(o.items || '[]'),
@@ -137,7 +142,7 @@ const registerRoutes = (router: Hono) => {
       total = items.reduce((sum: number, item: any) => sum + item.price * item.quantity, 0)
     }
 
-    const result = db.run(
+    const result = await db.run(
       `
       INSERT INTO orders (user_id, items, total_price, status, contact_info)
       VALUES (?, ?, ?, ?, ?)
@@ -156,7 +161,7 @@ const registerRoutes = (router: Hono) => {
       try {
         const token = authHeader.split(' ')[1]
         const payload = await verify(token, SECRET, 'HS256')
-        const orders = db.query('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC').all(payload.id)
+        const orders = await db.query('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC').all(payload.id)
         return c.json(orders.map((o: any) => ({ ...o, items: JSON.parse(o.items), contact_info: JSON.parse(o.contact_info) })))
       } catch (e) {}
     }

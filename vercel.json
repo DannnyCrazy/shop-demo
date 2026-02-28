@@ -2,14 +2,6 @@
   "buildCommand": "npm run build",
   "outputDirectory": "public",
   "installCommand": "npm install",
-  "functions": {
-    "api/index.ts": {
-      "includeFiles": "shop.sqlite"
-    },
-    "api/[...path].ts": {
-      "includeFiles": "shop.sqlite"
-    }
-  },
   "rewrites": [
     { "source": "/admin", "destination": "/admin/index.html" },
     { "source": "/admin/(.*)", "destination": "/admin/index.html" },
